@@ -41,9 +41,10 @@ export function generatePivotData({ data, rows, columns, values, aggregations })
         const result = {};
         values.forEach(val => {
           const nums = fieldAggs[val] || [];
-          switch (aggregations[val]) {
+          const aggregationType = aggregations[val] || "sum";
+          switch (aggregationType) {
             case "sum":
-              result[val] = nums.reduce((a, b) => a + b, 0);
+              result[val] = (nums.reduce((a, b) => a + b, 0)).toFixed(2);
               break;
             case "avg":
               result[val] = nums.length ? (nums.reduce((a, b) => a + b, 0) / nums.length).toFixed(2) : 0;
@@ -69,12 +70,12 @@ export function generatePivotData({ data, rows, columns, values, aggregations })
     const rowTotals = pivotMatrix.map(row =>
       row.reduce((acc, cell) => {
         return acc + values.reduce((subAcc, val) => subAcc + Number(cell[val] || 0), 0);
-      }, 0)
+      }, 0).toFixed(2)
     );
   
     const columnTotals = pivotColumns.flatMap((_, colIdx) =>
       values.map(val =>
-        pivotMatrix.reduce((acc, row) => acc + Number(row[colIdx][val] || 0), 0)
+        pivotMatrix.reduce((acc, row) => acc + Number(row[colIdx][val] || 0), 0).toFixed(2)
       )
     );
   

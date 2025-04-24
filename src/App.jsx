@@ -27,11 +27,11 @@ function App() {
   };
 
   return (
-    <div className="p-4">
+    <div className="p-4 ">
       <FileUploader onDataParsed={handleDataParsed} />
 
       {fields.length > 0 && (
-        <div className="flex flex-col md:flex-row gap-6 justify-between px-6">
+        <div className="flex gap-6 justify-between px-6">
           
           <div className="w-[70%] h-120 overflow-auto">
             <PivotTable

@@ -43,7 +43,13 @@ function renderHeaderRows(tree, depth, values, aggregations) {
         traverse(child, level + 1);
       } else {
         // leaf nodes (values like Units Sold, Price etc.)
-        rows[level].push({ label: `${label} (${aggregations[label]})`, colSpan: 1, rowSpan: depth - level });
+        if(values.length === 0){
+          rows[level].push({ label : label , colSpan : 0, rowSpan : depth - level});
+        }
+        else {
+          const aggregationType = aggregations[label] || "sum"
+          rows[level].push({ label: `${label} (${aggregationType})`, colSpan: 1, rowSpan: depth - level });
+        }
       }
     }
   }
@@ -66,7 +72,7 @@ export default function PivotTable({ data, rows, columns, values, aggregations }
 
   if (rows.length === 0 && columns.length === 0) {
     return (
-      <table className="table-auto w-full border-collapse border border-gray-300">
+      <table className="table-auto w-full border-collapse border border-gray-300 text-sm">
         <thead className="bg-gray-100">
           <tr>
             {Object.keys(data[0]).map((key) => (
@@ -124,8 +130,8 @@ export default function PivotTable({ data, rows, columns, values, aggregations }
                   {header.label}
                 </th>
               ))}
-              {rowIdx === 0 && (
-                <th rowSpan={maxDepth} className="border p-2 font-bold">Row Total</th>
+              {rowIdx === 0 && values.length > 0 && (
+                <th rowSpan={maxDepth} className="border p-2 font-bold text-gray-700">Row Total</th>
               )}
             </tr>
           ))}
@@ -141,24 +147,29 @@ export default function PivotTable({ data, rows, columns, values, aggregations }
                 {pivotMatrix[rowIdx].map((cell, cellIdx) => (
                   values.map((val, valIdx) => (
                     <td key={`cell_${rowIdx}_${cellIdx}_${valIdx}`} className="border p-2">
-                      {cell[val]}
+                      {cell[val] != 0 ? cell[val] : ""}
                     </td>
                   ))
                 ))}
-                <td className="border p-2 font-bold">{rowTotals[rowIdx]}</td>
+                {values.length > 0 && (
+                  <td className="border p-2 font-bold text-gray-700">{rowTotals[rowIdx]}</td>
+                )}
               </tr>
             );
           })}
         </tbody>
-        <tfoot className=" text-gray-700 font-semibold">
-          <tr>
-            <td className="border p-2 font-bold" colSpan={rows.length}>Column Totals</td>
-            {columnTotals.map((total, idx) => (
-              <td key={idx} className="border p-2 font-bold">{total}</td>
-            ))}
-            <td className="border p-2 font-bold"></td>
-          </tr>
-        </tfoot>
+        {values.length > 0 && (
+          <tfoot className=" text-gray-700 font-semibold">
+            <tr>
+              <td className="border p-2 font-bold" colSpan={rows.length}>Column Totals</td>
+              {columnTotals.map((total, idx) => (
+                <td key={idx} className="border p-2 font-bold">{total}</td>
+              ))}
+              <td className="border p-2 font-bold"></td>
+            </tr>
+          </tfoot>
+        )}
+
       </table>
     </div>
   );
