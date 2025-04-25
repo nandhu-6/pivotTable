@@ -171,7 +171,7 @@ export default function FieldSelector({
             {values.length > 0 && (
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1 text-gray-600">
-                  <span className="text-lg"><img src="https://img.icons8.com/ios-glyphs/30/calculator.png" alt="calculator" width="20" height="20" className="inline-block mr-1" /></span>
+                  <span className="text-lg"><img src="https://img.icons8.com/material-outlined/24/4A5565/calculator--v1.png" alt="calculator" width="20" height="20" className="inline-block mr-1" /></span>
                   <span className="text-sm font-medium">Aggregation</span>
                 </div>
                 <div className="p-2 border border-gray-200 rounded bg-white max-w-[140px] max-h-[120px]">
@@ -204,4 +204,5 @@ export default function FieldSelector({
     </DndProvider>
   );
 }
+
 

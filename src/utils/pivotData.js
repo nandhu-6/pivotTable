@@ -75,6 +75,7 @@ export function generatePivotData({ data, rows, columns, values, aggregations })
         }, 0).toFixed(2)
     );
     console.log("pivotcolumns :", pivotColumns);
+    console.log("pivotmatrix :", pivotMatrix);
 
     // const columnTotals = pivotColumns.flatMap((_, colIdx) =>
     //   values.map(val =>
@@ -85,15 +86,20 @@ export function generatePivotData({ data, rows, columns, values, aggregations })
 
     let columnTotals = pivotColumns.map((_, colIdx) => {
         const totals = {};
+        console.log("values", values);
+        
         values.forEach(val => {
             const aggregationType = aggregations[val] || "sum";
             const nums = pivotMatrix.map(row => Number(row[colIdx][val] || 0));
+            const length = (nums.filter(num => num != 0)).length;
             switch (aggregationType) {
                 case "sum":
                     totals[val] = nums.reduce((a, b) => a + b, 0).toFixed(2);
                     break;
                 case "avg":
-                    totals[val] = nums.length ? (nums.reduce((a, b) => a + b, 0) / nums.length).toFixed(2) : 0;
+                    console.log("nums : ",nums);
+                    
+                    totals[val] = nums.length ? (nums.reduce((a, b) => a + b, 0) / length).toFixed(2) : 0;
                     break;
                 case "count":
                     totals[val] = nums.reduce((a,b) => a+b, 0);
@@ -110,8 +116,9 @@ export function generatePivotData({ data, rows, columns, values, aggregations })
         });
         return totals;
     });
-    columnTotals = columnTotals.map(obj => Object.values(obj)[0]);
     console.log("column totals :", columnTotals);
+
+    columnTotals = columnTotals.map(obj => Object.values(obj)[0]);
     
 
 

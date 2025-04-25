@@ -146,7 +146,7 @@ export default function PivotTable({ data, rows, columns, values, aggregations }
                 {pivotMatrix[rowIdx].map((cell, cellIdx) => (
                   values.map((val, valIdx) => (
                     <td key={`cell_${rowIdx}_${cellIdx}_${valIdx}`} className="border p-2">
-                      {cell[val] != 0 ? cell[val] : ""}
+                      {cell[val] != 0 ? cell[val] : null}
                     </td>
                   ))
                 ))}
