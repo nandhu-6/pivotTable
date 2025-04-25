@@ -43,11 +43,10 @@ function renderHeaderRows(tree, depth, values, aggregations) {
         traverse(child, level + 1);
       } else {
         // leaf nodes (values like Units Sold, Price etc.)
-        if(values.length === 0){
-          rows[level].push({ label : label , colSpan : 0, rowSpan : depth - level});
-        }
-        else {
-          const aggregationType = aggregations[label] || "sum"
+        if (values.length === 0) {
+          rows[level].push({ label: label, colSpan: 0, rowSpan: depth - level });
+        } else {
+          const aggregationType = aggregations[label] || "sum";
           rows[level].push({ label: `${label} (${aggregationType})`, colSpan: 1, rowSpan: depth - level });
         }
       }
@@ -72,7 +71,7 @@ export default function PivotTable({ data, rows, columns, values, aggregations }
 
   if (rows.length === 0 && columns.length === 0) {
     return (
-      <table className="table-auto w-full border-collapse border border-gray-300 text-sm">
+      <table className="table-auto border-collapse border border-gray-300 text-sm" >
         <thead className="bg-gray-100">
           <tr>
             {Object.keys(data[0]).map((key) => (
@@ -106,8 +105,8 @@ export default function PivotTable({ data, rows, columns, values, aggregations }
   const headerRows = renderHeaderRows(columnTree, maxDepth, values, aggregations);
 
   return (
-    <div className="overflow-auto">
-      <table className="table-auto w-full border-collapse border border-gray-300 text-sm">
+    <div className="overflow-auto" id="scroll">
+      <table className="table-auto w-full border-collapse border border-gray-300 text-sm" >
         <thead className="bg-gray-100">
           {headerRows.map((headerRow, rowIdx) => (
             <tr key={rowIdx}>
@@ -163,13 +162,12 @@ export default function PivotTable({ data, rows, columns, values, aggregations }
             <tr>
               <td className="border p-2 font-bold" colSpan={rows.length}>Column Totals</td>
               {columnTotals.map((total, idx) => (
-                <td key={idx} className="border p-2 font-bold">{total}</td>
+                <td key={idx} className="border p-2 font-bold">{typeof total === 'object' ? JSON.stringify(total) : total}</td>
               ))}
               <td className="border p-2 font-bold"></td>
             </tr>
           </tfoot>
         )}
-
       </table>
     </div>
   );

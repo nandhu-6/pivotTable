@@ -12,7 +12,7 @@ export default function FileUploader({ onDataParsed }) {
   };
 
   return (
-    <div className="mb-6 ml-6">
+    <div className="mb-4 ml-6">
       <label className="inline-block bg-[#107C41] hover:bg-[#107c41e1] text-white font-semibold py-2 px-4 rounded cursor-pointer">
         Import File
         <input
