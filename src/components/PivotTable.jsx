@@ -107,7 +107,7 @@ export default function PivotTable({ data, rows, columns, values, aggregations }
   return (
     <div className="overflow-auto" id="scroll">
       <table className="table-auto w-full border-collapse border border-gray-300 text-sm" >
-        <thead className="bg-gray-100">
+        <thead className="bg-[#c0e4f59a]">
           {headerRows.map((headerRow, rowIdx) => (
             <tr key={rowIdx}>
               {rowIdx === 0 && rows.map((r, idx) => (
@@ -158,11 +158,15 @@ export default function PivotTable({ data, rows, columns, values, aggregations }
           })}
         </tbody>
         {values.length > 0 && (
-          <tfoot className=" text-gray-700 font-semibold">
+          <tfoot className="text-gray-700 font-semibold">
             <tr>
               <td className="border p-2 font-bold" colSpan={rows.length}>Column Totals</td>
               {columnTotals.map((total, idx) => (
-                <td key={idx} className="border p-2 font-bold">{typeof total === 'object' ? JSON.stringify(total) : total}</td>
+                values.map((val, valIdx) => (
+                  <td key={`${idx}_${valIdx}`} className="border p-2 font-bold">
+                    {total[val]}
+                  </td>
+                ))
               ))}
               <td className="border p-2 font-bold"></td>
             </tr>
