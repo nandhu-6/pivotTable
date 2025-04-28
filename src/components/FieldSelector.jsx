@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { RowIcon, ColumnIcon } from "../assets/icons"
+import reset from '../assets/images/reset.png'
 
 const FieldItem = ({ field, type, onDrop, onRemove, isDateHierarchy }) => {
   const [{ isDragging }, drag] = useDrag({
@@ -167,7 +168,7 @@ export default function FieldSelector({
             onClick={handleReset}
           >
             <img
-              src="../public/reset.png"
+              src={reset}
               alt="reset"
               width="20"
               height="20"
