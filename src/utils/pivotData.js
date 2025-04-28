@@ -105,7 +105,11 @@ export function generatePivotData({ data, rows, columns, values, aggregations })
                     totals[val] = nums.reduce((a, b) => a + b, 0);
                     break;
                 case "min":
-                    totals[val] = nums.length ? Math.min(...nums) : 0;
+                    const validNums = pivotMatrix
+                        .map(row => row[colIdx][val])
+                        .filter(x => x !== null && x !== undefined && x !== '' && x!== 0)
+                        .map(Number);
+                    totals[val] = validNums.length ? Math.min(...validNums) : 0;
                     break;
                 case "max":
                     totals[val] = nums.length ? Math.max(...nums) : 0;

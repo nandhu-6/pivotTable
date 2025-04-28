@@ -5,10 +5,13 @@ function buildColumnTree(columns, values) {
   const tree = {};
 
   columns.forEach(colKey => {
+   
     const parts = colKey.split(" | ");
     let current = tree;
+    
 
     parts.forEach((part, index) => {
+      
       if (!current[part]) {
         current[part] = {};
       }
@@ -33,7 +36,7 @@ function getMaxDepth(tree) {
 function renderHeaderRows(tree, depth, values, aggregations) {
   const rows = Array.from({ length: depth }, () => []);
 
-  function traverse(node, level) {
+  function traverse(node, level) { //traverse(product,1)
     for (const label in node) {
       const child = node[label];
 
@@ -72,7 +75,7 @@ export default function PivotTable({ data, rows, columns, values, aggregations }
   if (rows.length === 0 && columns.length === 0) {
     return (
       <table className="table-auto border-collapse border border-gray-300 text-sm" >
-        <thead className="bg-gray-100">
+        <thead className="bg-[#c0e4f59a]">
           <tr>
             {Object.keys(data[0]).map((key) => (
               <th key={key} className="border p-2">{key}</th>
