@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { RowIcon, ColumnIcon } from "../assets/icons"
 
-const FieldItem = ({ field, type, onDrop, onRemove }) => {
+const FieldItem = ({ field, type, onDrop, onRemove, isDateHierarchy }) => {
   const [{ isDragging }, drag] = useDrag({
     type: "FIELD",
     item: { field, sourceType: type },
@@ -15,10 +15,10 @@ const FieldItem = ({ field, type, onDrop, onRemove }) => {
   return (
     <div
       ref={drag}
-      className={`p-1 text-[12px] bg-[#ffffffb5] border border-gray-300 rounded shadow-sm cursor-move flex items-center justify-between mb-1   ${isDragging ? "opacity-50" : ""
+      className={`p-1 text-[12px] bg-[#ffffffb5] border border-gray-300 rounded shadow-sm cursor-move flex items-center justify-between mb-1 ${isDragging ? "opacity-50" : ""
         }`}
     >
-      <span>{field}</span>
+      <span className={isDateHierarchy ? "text-blue-600" : ""}>{field}</span>
       {type !== "available" && (
         <button
           onClick={(e) => {
@@ -51,7 +51,7 @@ const DropZone = ({ type, fields, onDrop, onRemove, title, icon }) => {
       </div>
       <div
         ref={drop}
-        className={`p-2 border rounded min-h-28 max-h-[130px]  ${isOver ? "bg-blue-50 border-blue-300" : "bg-white border-gray-200"
+        className={`p-2 border rounded min-h-28 max-h-[130px] ${isOver ? "bg-blue-50 border-blue-300" : "bg-white border-gray-200"
           }`}
       >
         <div className="max-h-[90px] overflow-y-auto no-scrollbar">
@@ -62,6 +62,7 @@ const DropZone = ({ type, fields, onDrop, onRemove, title, icon }) => {
               type={type}
               onDrop={onDrop}
               onRemove={onRemove}
+              isDateHierarchy={field.includes("_Year") || field.includes("_Quarter") || field.includes("_Month")}
             />
           ))}
         </div>
@@ -82,17 +83,54 @@ export default function FieldSelector({
   setAggregations,
   numericalFields,
 }) {
+  const [dateFields, setDateFields] = useState([]);
+  const [dateHierarchyFields, setDateHierarchyFields] = useState([]);
+
+  // Detect date fields and create hierarchy fields
+  useEffect(() => {
+    // Only detect fields that are explicitly named as dates
+    const dateCols = fields.filter(field =>
+      field.toLowerCase().includes(" on") ||
+      field.toLowerCase().includes("date") ||
+      field.toLowerCase().includes("dob")
+    );
+
+    const hierarchyFields = dateCols.flatMap(dateField => [
+      `${dateField}_Year`,
+      `${dateField}_Quarter`,
+      `${dateField}_Month`
+    ]);
+
+    setDateFields(dateCols);
+    setDateHierarchyFields(hierarchyFields);
+  }, [fields]);
+
   const handleDrop = (field, targetType) => {
+    let newRows = [...rows];
+    let newColumns = [...columns];
+    let newValues = [...values];
+    let newAggregations = { ...aggregations };
+
     // Remove from source
-    if (rows.includes(field)) setRows(rows.filter((f) => f !== field));
-    if (columns.includes(field)) setColumns(columns.filter((f) => f !== field));
-    if (values.includes(field)) setValues(values.filter((f) => f !== field));
+    if (newRows.includes(field)) newRows = newRows.filter((f) => f !== field);
+    if (newColumns.includes(field)) newColumns = newColumns.filter((f) => f !== field);
+    if (newValues.includes(field)) {
+      newValues = newValues.filter((f) => f !== field);
+      delete newAggregations[field];
+    }
 
     // Add to target
-    if (targetType === "rows") setRows([...rows, field]);
-    if (targetType === "columns") setColumns([...columns, field]);
-    if (targetType === "values") setValues([...values, field]);
+    if (targetType === "rows" && !newRows.includes(field)) newRows.push(field);
+    if (targetType === "columns" && !newColumns.includes(field)) newColumns.push(field);
+    if (targetType === "values" && !newValues.includes(field)) newValues.push(field);
+
+    // Finally update all together
+    setRows(newRows);
+    setColumns(newColumns);
+    setValues(newValues);
+    setAggregations(newAggregations);
   };
+
 
   const handleRemove = (field) => {
     if (rows.includes(field)) setRows(rows.filter((f) => f !== field));
@@ -105,27 +143,48 @@ export default function FieldSelector({
     }
   };
 
-  const availableFields = fields.filter(
-    (f) => !rows.includes(f) && !columns.includes(f) && !values.includes(f)
-  );
+  const handleReset = () => {
+    setRows([]);
+    setColumns([]);
+    setValues([]);
+    setAggregations({});
+  };
+
+  // Combine regular fields and date hierarchy fields
+  const allAvailableFields = [
+    ...fields.filter(f => !rows.includes(f) && !columns.includes(f) && !values.includes(f)),
+    ...dateHierarchyFields.filter(f => !rows.includes(f) && !columns.includes(f) && !values.includes(f))
+  ];
 
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="w-[300px] h-[480px] flex flex-col bg-[#F5F5F5] shadow-lg">
         {/* Header */}
-        <div className="px-3 py-2">
+        <div className="px-3 py-2 flex justify-between">
           <h2 className="font-semibold text-gray-600">PivotTable Fields</h2>
+          <button 
+            className="cursor-pointer hover:opacity-70 transition-opacity" 
+            onClick={handleReset}
+          >
+            <img
+              src="../public/reset.png"
+              alt="reset"
+              width="20"
+              height="20"
+            />
+          </button>
         </div>
 
         {/* Available Fields */}
         <div className="flex-1 max-h-45 overflow-y-auto border-b border-b-gray-300 p-3 pt-0" id="scroll">
-          {availableFields.map((field) => (
+          {allAvailableFields.map((field) => (
             <FieldItem
               key={field}
               field={field}
               type="available"
               onDrop={handleDrop}
               onRemove={handleRemove}
+              isDateHierarchy={field.includes("_Year") || field.includes("_Quarter") || field.includes("_Month")}
             />
           ))}
         </div>
@@ -171,11 +230,19 @@ export default function FieldSelector({
             {values.length > 0 && (
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1 text-gray-600">
-                  <span className="text-lg"><img src="https://img.icons8.com/material-outlined/24/4A5565/calculator--v1.png" alt="calculator" width="20" height="20" className="inline-block mr-1" /></span>
+                  <span className="text-lg">
+                    <img
+                      src="https://img.icons8.com/material-outlined/24/4A5565/calculator--v1.png"
+                      alt="calculator"
+                      width="20"
+                      height="20"
+                      className="inline-block mr-1"
+                    />
+                  </span>
                   <span className="text-sm font-medium">Aggregation</span>
                 </div>
                 <div className="p-2 border border-gray-200 rounded bg-white max-w-[140px] max-h-[120px]">
-                  <div className=" max-w-[135px] min-h-[94px] max-h-[94px] overflow-y-auto no-scrollbar">
+                  <div className="max-w-[135px] min-h-[94px] max-h-[94px] overflow-y-auto no-scrollbar">
                     {values.map((val) => (
                       <div key={val} className="flex justify-between items-center gap-2 text-[10px]">
                         <span className="font-medium">{val}:</span>
