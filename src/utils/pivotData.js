@@ -152,7 +152,9 @@ export function generatePivotData({ data, rows, columns, values, aggregations })
                     totals[val] = !Number.isInteger(totals[val]) ? Number(totals[val].toFixed(2)) : totals[val];
                     break;
                 case "avg":
-                    totals[val] = nums.length ? (nums.reduce((a, b) => a + b, 0) / length).toFixed(2) : 0;
+                    // console.log("nums",nums);
+                    // console.log("length",length);
+                    totals[val] = nums.length ? (nums.reduce((a, b) => a + b, 0) / length).toFixed(2): 0;
                     break;
                 case "count":
                     totals[val] = nums.reduce((a, b) => a + b, 0);

@@ -133,7 +133,21 @@ export default function PivotTable({ data, rows, columns, values, aggregations }
                 </th>
               ))}
               {rowIdx === 0 && values.length > 0 && (
-                <th rowSpan={maxDepth} className="border p-2 font-bold text-gray-700">Row Total</th>
+                values.map((val, valIdx) => {
+                  const agg = (aggregations[val] || 'sum');
+                  const aggLabel =
+                    agg === 'sum' ? 'Sum'
+                    : agg === 'avg' ? 'Avg'
+                    : agg === 'min' ? 'Min'
+                    : agg === 'max' ? 'Max'
+                    : agg === 'count' ? 'Count'
+                    : agg;
+                  return (
+                    <th key={`rowtotal_header_${valIdx}`} rowSpan={maxDepth} className="border p-2 font-bold text-gray-700">
+                      {`Total ${aggLabel} of ${val}`}
+                    </th>
+                  );
+                })
               )}
             </tr>
           ))}
@@ -154,7 +168,11 @@ export default function PivotTable({ data, rows, columns, values, aggregations }
                   ))
                 ))}
                 {values.length > 0 && (
-                  <td className="border p-2 font-bold text-gray-700">{rowTotals[rowIdx]}</td>
+                  values.map((val, valIdx) => (
+                    <td key={`rowtotal_${rowIdx}_${valIdx}`} className="border p-2 font-bold text-gray-700">
+                      {pivotMatrix[rowIdx].reduce((acc, cell) => acc + Number(cell[val] || 0), 0)}
+                    </td>
+                  ))
                 )}
               </tr>
             );
@@ -171,7 +189,11 @@ export default function PivotTable({ data, rows, columns, values, aggregations }
                   </td>
                 ))
               ))}
-              <td className="border p-2 font-bold"></td>
+              {values.map((val, valIdx) => (
+                <td key={`grandtotal_${valIdx}`} className="border p-2 font-bold">
+                  {columnTotals.reduce((acc, total) => acc + Number(total[val] || 0), 0)}
+                </td>
+              ))}
             </tr>
           </tfoot>
         )}
