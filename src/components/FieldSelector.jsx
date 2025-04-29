@@ -4,7 +4,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { RowIcon, ColumnIcon } from "../assets/icons"
 import reset from '../assets/images/reset.png'
 
-const FieldItem = ({ field, type, onDrop, onRemove, isDateHierarchy }) => {
+const FieldItem = ({ field, type, onDrop, onRemove, isDateHierarchy, isNumerical }) => {
   const [{ isDragging }, drag] = useDrag({
     type: "FIELD",
     item: { field, sourceType: type },
@@ -19,7 +19,10 @@ const FieldItem = ({ field, type, onDrop, onRemove, isDateHierarchy }) => {
       className={`p-1 text-[12px] bg-[#ffffffb5] border border-gray-300 rounded shadow-sm cursor-move flex items-center justify-between mb-1 ${isDragging ? "opacity-50" : ""
         }`}
     >
-      <span className={isDateHierarchy ? "text-blue-600" : ""}>{field}</span>
+      <span className={`${isDateHierarchy ? "text-blue-600" : ""} ${isNumerical ? "flex items-center gap-1" : ""}`}>
+        {isNumerical && <span className="text-gray-600">Σ</span>}
+        {field}
+      </span>
       {type !== "available" && (
         <button
           onClick={(e) => {
@@ -64,6 +67,7 @@ const DropZone = ({ type, fields, onDrop, onRemove, title, icon }) => {
               onDrop={onDrop}
               onRemove={onRemove}
               isDateHierarchy={field.includes("_Year") || field.includes("_Quarter") || field.includes("_Month")}
+              isNumerical={field.includes("_Year") || field.includes("_Quarter") || field.includes("_Month")}
             />
           ))}
         </div>
@@ -186,6 +190,7 @@ export default function FieldSelector({
               onDrop={handleDrop}
               onRemove={handleRemove}
               isDateHierarchy={field.includes("_Year") || field.includes("_Quarter") || field.includes("_Month")}
+              isNumerical={numericalFields.includes(field)}
             />
           ))}
         </div>
