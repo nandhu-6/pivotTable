@@ -191,7 +191,7 @@ export default function PivotTable({ data, rows, columns, values, aggregations }
               ))}
               {values.map((val, valIdx) => (
                 <td key={`grandtotal_${valIdx}`} className="border p-2 font-bold">
-                  {columnTotals.reduce((acc, total) => acc + Number(total[val] || 0), 0)}
+                  {Number(columnTotals.reduce((acc, total) => acc + Number(total[val] || 0), 0)).toFixed(2)}
                 </td>
               ))}
             </tr>
