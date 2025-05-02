@@ -4,7 +4,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { RowIcon, ColumnIcon } from "../assets/icons"
 import reset from '../assets/images/reset.png'
 
-const FieldItem = ({ field, type, onDrop, onRemove, isDateHierarchy, isNumerical }) => {
+const FieldItem = ({ field, type, onDrop, onRemove, isDateHierarchy, isNumerical, aggregations, setAggregations }) => {
   const [{ isDragging }, drag] = useDrag({
     type: "FIELD",
     item: { field, sourceType: type },
@@ -16,29 +16,44 @@ const FieldItem = ({ field, type, onDrop, onRemove, isDateHierarchy, isNumerical
   return (
     <div
       ref={drag}
-      className={`p-1 text-[12px] bg-[#ffffffb5] border border-gray-300 rounded shadow-sm cursor-move flex items-center justify-between mb-1 ${isDragging ? "opacity-50" : ""
-        }`}
+      className={`p-1 text-[12px] bg-[#ffffffb5] border border-gray-300 rounded shadow-sm cursor-move flex items-center justify-between mb-1 ${isDragging ? "opacity-50" : ""}`}
     >
-      <span className={`${isDateHierarchy ? "text-blue-600" : ""} ${isNumerical ? "flex items-center gap-1" : ""}`}>
+      <div className={`${isDateHierarchy ? "text-blue-600" : ""} flex items-center gap-1`}>
         {isNumerical && <span className="text-gray-600">Σ</span>}
-        {field}
-      </span>
-      {type !== "available" && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onRemove(field);
-          }}
-          className="ml-2 text-gray-400 hover:text-gray-600"
-        >
-          ×
-        </button>
-      )}
+        <span>{field}</span>
+      </div>
+      <div className="flex items-center gap-1">
+        {type === "values" && (
+          <select
+            className="py-0.5 border border-gray-300 shadow-sm rounded text-[10px] max-w-[50px]"
+            value={aggregations[field] || "sum"}
+            onClick={(e) => e.stopPropagation()}
+            onChange={(e) => setAggregations((prev) => ({ ...prev, [field]: e.target.value }))}
+          >
+            <option value="sum">Sum</option>
+            <option value="avg">Avg</option>
+            <option value="count">Count</option>
+            <option value="min">Min</option>
+            <option value="max">Max</option>
+          </select>
+        )}
+        {type !== "available" && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemove(field);
+            }}
+            className="text-gray-400 hover:text-gray-600"
+          >
+            ×
+          </button>
+        )}
+      </div>
     </div>
   );
 };
 
-const DropZone = ({ type, fields, onDrop, onRemove, title, icon }) => {
+const DropZone = ({ type, fields, onDrop, onRemove, title, icon, aggregations, setAggregations }) => {
   const [{ isOver }, drop] = useDrop({
     accept: "FIELD",
     drop: (item) => onDrop(item.field, type),
@@ -55,8 +70,7 @@ const DropZone = ({ type, fields, onDrop, onRemove, title, icon }) => {
       </div>
       <div
         ref={drop}
-        className={`p-2 border rounded min-h-28 max-h-[130px] ${isOver ? "bg-blue-50 border-blue-300" : "bg-white border-gray-200"
-          }`}
+        className={`p-2 border rounded min-h-28 max-h-[130px] ${isOver ? "bg-blue-50 border-blue-300" : "bg-white border-gray-200"}`}
       >
         <div className="max-h-[90px] overflow-y-auto no-scrollbar">
           {fields.map((field) => (
@@ -67,7 +81,9 @@ const DropZone = ({ type, fields, onDrop, onRemove, title, icon }) => {
               onDrop={onDrop}
               onRemove={onRemove}
               isDateHierarchy={field.includes("_Year") || field.includes("_Quarter") || field.includes("_Month")}
-              isNumerical={field.includes("_Year") || field.includes("_Quarter") || field.includes("_Month")}
+              isNumerical={type === "values"}
+              aggregations={aggregations}
+              setAggregations={setAggregations}
             />
           ))}
         </div>
@@ -191,6 +207,8 @@ export default function FieldSelector({
               onRemove={handleRemove}
               isDateHierarchy={field.includes("_Year") || field.includes("_Quarter") || field.includes("_Month")}
               isNumerical={numericalFields.includes(field)}
+              aggregations={aggregations}
+              setAggregations={setAggregations}
             />
           ))}
         </div>
@@ -207,6 +225,8 @@ export default function FieldSelector({
                 onRemove={handleRemove}
                 title="Rows"
                 icon={<RowIcon />}
+                aggregations={aggregations}
+                setAggregations={setAggregations}
               />
             </div>
             <div className="flex-1">
@@ -217,60 +237,24 @@ export default function FieldSelector({
                 onRemove={handleRemove}
                 title="Columns"
                 icon={<ColumnIcon />}
+                aggregations={aggregations}
+                setAggregations={setAggregations}
               />
             </div>
           </div>
 
-          {/* Values and Aggregations */}
-          <div className="flex gap-2">
-            <div className="flex-1">
-              <DropZone
-                type="values"
-                fields={values}
-                onDrop={handleDrop}
-                onRemove={handleRemove}
-                title="Values"
-                icon="Σ"
-              />
-            </div>
-            {values.length > 0 && (
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1 text-gray-600">
-                  <span className="text-lg">
-                    <img
-                      src="https://img.icons8.com/material-outlined/24/4A5565/calculator--v1.png"
-                      alt="calculator"
-                      width="20"
-                      height="20"
-                      className="inline-block mr-1"
-                    />
-                  </span>
-                  <span className="text-sm font-medium">Aggregation</span>
-                </div>
-                <div className="p-2 border border-gray-200 rounded bg-white max-w-[140px] max-h-[120px]">
-                  <div className="max-w-[135px] min-h-[94px] max-h-[94px] overflow-y-auto no-scrollbar">
-                    {values.map((val) => (
-                      <div key={val} className="flex justify-between items-center gap-2 text-[10px]">
-                        <span className="font-medium">{val}:</span>
-                        <select
-                          className="flex-1 py-0.5 border border-gray-300 shadow-sm rounded max-w-[50px]"
-                          value={aggregations[val] || "sum"}
-                          onChange={(e) =>
-                            setAggregations((prev) => ({ ...prev, [val]: e.target.value }))
-                          }
-                        >
-                          <option value="sum">Sum</option>
-                          <option value="avg">Avg</option>
-                          <option value="count">Count</option>
-                          <option value="min">Min</option>
-                          <option value="max">Max</option>
-                        </select>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
+          {/* Values with inline aggregation */}
+          <div className="flex-1">
+            <DropZone
+              type="values"
+              fields={values}
+              onDrop={handleDrop}
+              onRemove={handleRemove}
+              title="Values"
+              icon="Σ"
+              aggregations={aggregations}
+              setAggregations={setAggregations}
+            />
           </div>
         </div>
       </div>
