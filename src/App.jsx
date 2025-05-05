@@ -20,23 +20,25 @@ function App() {
       setFields(allFields);
 
       // find numerical fields
-// console.log("allfields :", allFields);
+      // console.log("allfields :", allFields);
 
       const nums = allFields.filter(f =>
         typeof parsedData[0][f] === "number" && !f.toLowerCase().includes("year")
       );
       setNumericalFields(nums);
-      console.log("numericalfields",numericalFields);
+      console.log("numericalfields", numericalFields);
     }
   };
 
   return (
-    <div className="p-3 ">
-      <FileUploader onDataParsed={handleDataParsed} />
+    <div className="p-3 flex flex-col justify-center min-h-screen">
+      <div>
+        <FileUploader onDataParsed={handleDataParsed} />
+      </div>
 
       {fields.length > 0 && (
         <div className="flex gap-6 justify-between px-6">
-          
+
           <div className="w-[70%] h-120 overflow-auto" id="scroll">
             <PivotTable
               data={data}
@@ -47,20 +49,20 @@ function App() {
             />
           </div>
           <div className="h-120">
-          <FieldSelector
-            fields={fields}
-            rows={rows}
-            setRows={setRows}
-            columns={columns}
-            setColumns={setColumns}
-            values={values}
-            setValues={setValues}
-            aggregations={aggregations}
-            setAggregations={setAggregations}
-            numericalFields={numericalFields}
-          />
+            <FieldSelector
+              fields={fields}
+              rows={rows}
+              setRows={setRows}
+              columns={columns}
+              setColumns={setColumns}
+              values={values}
+              setValues={setValues}
+              aggregations={aggregations}
+              setAggregations={setAggregations}
+              numericalFields={numericalFields}
+            />
           </div>
-          
+
         </div>
       )}
     </div>
