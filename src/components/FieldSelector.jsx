@@ -122,6 +122,8 @@ export default function FieldSelector({
       `${dateField}_Month`
     ]);
 
+    handleReset(); // after dragging fields, when we try to import new file => be resetted
+
     setDateFields(dateCols);
     setDateHierarchyFields(hierarchyFields);
   }, [fields]);
